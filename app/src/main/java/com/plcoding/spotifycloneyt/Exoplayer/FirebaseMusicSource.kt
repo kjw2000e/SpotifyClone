@@ -73,7 +73,7 @@ class FirebaseMusicSource @Inject constructor(
             .setIconUri(song.description.iconUri)
             .build()
         MediaBrowserCompat.MediaItem(desc, FLAG_PLAYABLE)
-    }
+    }.toMutableList()
 
 
     // firestore 로부터 song을 download 받을 때 처리하기 위한 작업들. state
