@@ -16,6 +16,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.plcoding.spotifycloneyt.Exoplayer.callbacks.MusicPlaybackPreparer
 import com.plcoding.spotifycloneyt.Exoplayer.callbacks.MusicPlayerEventListener
 import com.plcoding.spotifycloneyt.Exoplayer.callbacks.MusicPlayerNotificationListener
+import com.plcoding.spotifycloneyt.other.Constants.MEDIA_ROOT_ID
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,14 @@ class MusicService : MediaBrowserServiceCompat() {
 
     private var curPlayingSong: MediaMetadataCompat ?= null
 
+    private var isPlayerInitialized = false
+    private lateinit var musicPlayerEventListener: MusicPlayerEventListener
+
+    companion object {
+        var curSongDuration = 0L
+            private set
+    }
+
     override fun onCreate() {
         super.onCreate()
         // 필수 mediasession, mediasession connector 생성
@@ -69,7 +78,10 @@ class MusicService : MediaBrowserServiceCompat() {
             this,
             mediaSession.sessionToken,
             MusicPlayerNotificationListener(this)
-        )
+        ) {
+            // we need to update current duration of playing song
+            curSongDuration = exoPlayer.duration
+        }
 
         val musicPlaybackPreparer = MusicPlaybackPreparer(firebaseMusicSource) {
             curPlayingSong = it
@@ -84,7 +96,8 @@ class MusicService : MediaBrowserServiceCompat() {
         mediaSessionConnector.setPlaybackPreparer(musicPlaybackPreparer)
         mediaSessionConnector.setPlayer(exoPlayer)
 
-        exoPlayer.addListener(MusicPlayerEventListener(this))
+        musicPlayerEventListener = MusicPlayerEventListener(this)
+        exoPlayer.addListener(musicPlayerEventListener)
         musicNotificationManager.showNotification(exoPlayer)
     }
 
@@ -99,9 +112,18 @@ class MusicService : MediaBrowserServiceCompat() {
         exoPlayer.playWhenReady = playNow
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        exoPlayer.stop()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()
+
+        //prevent memory leak for exoplayer
+        exoPlayer.removeListener(musicPlayerEventListener)
+        exoPlayer.release()
     }
 
     override fun onGetRoot(
@@ -109,13 +131,33 @@ class MusicService : MediaBrowserServiceCompat() {
         clientUid: Int,
         rootHints: Bundle?
     ): BrowserRoot? {
-        TODO("Not yet implemented")
+        return BrowserRoot(MEDIA_ROOT_ID, null)
     }
 
     override fun onLoadChildren(
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
-        TODO("Not yet implemented")
+        when (parentId) {
+            MEDIA_ROOT_ID -> {
+                val resultSent = firebaseMusicSource.whenReady { isInitialized ->
+                    if (isInitialized) { //firebaseMusicSource가 초기화(initialized) 됐으면 가져온 데이터를 클라이언트로 보낸다?
+                        result.sendResult(firebaseMusicSource.asMediaItems())
+                        if (!isPlayerInitialized && firebaseMusicSource.songs.isNotEmpty()) {
+                            // 앱이 실행됐을 때 첫번째 song prepare를 하고 자동재생이 되지 않기를 원한다.
+                            preparePlayer(firebaseMusicSource.songs, firebaseMusicSource.songs[0], false)
+                            isPlayerInitialized = true
+                        }
+                    } else {
+                        // firebaseMusicSource가 아직 초기화 되지 않음
+                        result.sendResult(null)
+                    }
+                }
+
+                if (!resultSent) {
+                    result.detach() // result를 현재 스레드에서 분리하고 나중에 sendResult 호출이 발생하도록 callback
+                }
+            }
+        }
     }
 }
