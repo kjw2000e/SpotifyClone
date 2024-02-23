@@ -141,7 +141,7 @@ class MusicService : MediaBrowserServiceCompat() {
         when (parentId) {
             MEDIA_ROOT_ID -> {
                 val resultSent = firebaseMusicSource.whenReady { isInitialized ->
-                    if (isInitialized) { //firebaseMusicSource가 초기화(initialized) 됐으면 가져온 데이터를 클라이언트로 보낸다?
+                    if (isInitialized) { //firebaseMusicSource가 초기화(state == initialized) 됐으면 가져온 데이터를 클라이언트로 보낸다?
                         result.sendResult(firebaseMusicSource.asMediaItems())
                         if (!isPlayerInitialized && firebaseMusicSource.songs.isNotEmpty()) {
                             // 앱이 실행됐을 때 첫번째 song prepare를 하고 자동재생이 되지 않기를 원한다.
@@ -149,12 +149,12 @@ class MusicService : MediaBrowserServiceCompat() {
                             isPlayerInitialized = true
                         }
                     } else {
-                        // firebaseMusicSource가 아직 초기화 되지 않음
+                        // firebaseMusicSource가 아직 초기화 되지 않음 (state == error)
                         result.sendResult(null)
                     }
                 }
 
-                if (!resultSent) {
+                if (!resultSent) { // state == STATE_CREATED || state == STATE_INITIALIZING 이면
                     result.detach() // result를 현재 스레드에서 분리하고 나중에 sendResult 호출이 발생하도록 callback
                 }
             }

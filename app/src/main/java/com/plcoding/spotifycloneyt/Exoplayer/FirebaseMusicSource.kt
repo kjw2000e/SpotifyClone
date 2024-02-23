@@ -100,6 +100,7 @@ class FirebaseMusicSource @Inject constructor(
             onReadyListeners += action
             return false
         } else {
+            //람다 실행
             action(state == STATE_INITIALIZED)
             return true
         }
