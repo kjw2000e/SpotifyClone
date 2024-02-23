@@ -17,6 +17,7 @@ import com.plcoding.spotifycloneyt.Exoplayer.callbacks.MusicPlaybackPreparer
 import com.plcoding.spotifycloneyt.Exoplayer.callbacks.MusicPlayerEventListener
 import com.plcoding.spotifycloneyt.Exoplayer.callbacks.MusicPlayerNotificationListener
 import com.plcoding.spotifycloneyt.other.Constants.MEDIA_ROOT_ID
+import com.plcoding.spotifycloneyt.other.Constants.NETWORK_ERROR
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -150,6 +151,9 @@ class MusicService : MediaBrowserServiceCompat() {
                         }
                     } else {
                         // firebaseMusicSource가 아직 초기화 되지 않음 (state == error)
+                        // network error가 발생했음
+                        // mediasession 객체로 네트워크에러 이벤트를 전송. 전송하면 mediasession callback 함수가 처리?
+                        mediaSession.sendSessionEvent(NETWORK_ERROR, null)
                         result.sendResult(null)
                     }
                 }
