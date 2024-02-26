@@ -1,4 +1,4 @@
-package com.plcoding.spotifycloneyt.ui
+package com.plcoding.spotifycloneyt.ui.viewmodels
 
 import android.media.MediaMetadata.METADATA_KEY_MEDIA_ID
 import android.support.v4.media.MediaBrowserCompat
