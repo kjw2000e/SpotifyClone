@@ -4,6 +4,6 @@ data class Song(
     val mediaId: String = "",
     val title: String = "",
     val subTitle: String = "",
-    val imageUrl: String = "",
+    val imgUrl: String = "",
     val songUrl: String = "",
 )

@@ -44,7 +44,7 @@ class MainViewModel @ViewModelInject constructor(
                         title = mediaItem.description.title.toString(),
                         subTitle = mediaItem.description.subtitle.toString(),
                         songUrl = mediaItem.description.mediaUri.toString(),
-                        imageUrl = mediaItem.description.iconUri.toString()
+                        imgUrl = mediaItem.description.iconUri.toString()
                     )
                 }
                 _mediaItems.postValue(Resource.success(items))

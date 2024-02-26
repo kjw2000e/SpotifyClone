@@ -4,11 +4,11 @@ import android.media.MediaMetadata.METADATA_KEY_ALBUM_ART_URI
 import android.media.MediaMetadata.METADATA_KEY_ARTIST
 import android.media.MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION
 import android.media.MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI
+import android.media.MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE
 import android.media.MediaMetadata.METADATA_KEY_DISPLAY_TITLE
 import android.media.MediaMetadata.METADATA_KEY_MEDIA_ID
 import android.media.MediaMetadata.METADATA_KEY_MEDIA_URI
 import android.media.MediaMetadata.METADATA_KEY_TITLE
-import android.media.browse.MediaBrowser
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
 import android.support.v4.media.MediaDescriptionCompat
@@ -41,9 +41,10 @@ class FirebaseMusicSource @Inject constructor(
                 .putString(METADATA_KEY_MEDIA_ID, song.mediaId)
                 .putString(METADATA_KEY_TITLE, song.title)
                 .putString(METADATA_KEY_DISPLAY_TITLE, song.title)
-                .putString(METADATA_KEY_DISPLAY_ICON_URI, song.imageUrl)
+                .putString(METADATA_KEY_DISPLAY_ICON_URI, song.imgUrl)
                 .putString(METADATA_KEY_MEDIA_URI, song.songUrl)
                 .putString(METADATA_KEY_ALBUM_ART_URI, song.songUrl)
+                .putString(METADATA_KEY_DISPLAY_SUBTITLE, song.subTitle)
                 .putString(METADATA_KEY_DISPLAY_DESCRIPTION, song.subTitle)
                 .build()
         }
@@ -83,7 +84,7 @@ class FirebaseMusicSource @Inject constructor(
     // 밑의 state == STATE_INITIALIZED 가 true가 되면서 각 리스너의 state값을 변경한다.
     private var state: State = STATE_CREATED
         set(value) {
-            if (state == STATE_INITIALIZED || state == STATE_ERROR) {
+            if (value == STATE_INITIALIZED || value == STATE_ERROR) {
                 synchronized(onReadyListeners) {
                     field = value
                     onReadyListeners.forEach { listener ->
