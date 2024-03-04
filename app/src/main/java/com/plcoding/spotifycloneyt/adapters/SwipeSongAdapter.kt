@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.list_item.view.tvPrimary
 import kotlinx.android.synthetic.main.list_item.view.tvSecondary
 import javax.inject.Inject
 
-class SwipeSongAdapter : BaseSongAdapter(R.layout.list_item) {
+class SwipeSongAdapter : BaseSongAdapter(R.layout.swipe_item) {
 
     override val differ = AsyncListDiffer(this, diffCallback)
 
