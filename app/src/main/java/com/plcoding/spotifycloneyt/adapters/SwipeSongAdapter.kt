@@ -14,18 +14,15 @@ import kotlinx.android.synthetic.main.list_item.view.tvPrimary
 import kotlinx.android.synthetic.main.list_item.view.tvSecondary
 import javax.inject.Inject
 
-class SongAdapter @Inject constructor(
-    private val glide: RequestManager
-) : BaseSongAdapter(R.layout.list_item) {
+class SwipeSongAdapter : BaseSongAdapter(R.layout.list_item) {
 
     override val differ = AsyncListDiffer(this, diffCallback)
 
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
         val song = songs[position]
         holder.itemView.apply {
-            tvPrimary.text = song.title
-            tvSecondary.text = song.subTitle
-            glide.load(song.imgUrl).into(ivItemImage)
+            val text = "${song.title} - ${song.subTitle}"
+            tvPrimary.text = text
 
             setOnClickListener {
                 onItemClickListener?.let { click ->
