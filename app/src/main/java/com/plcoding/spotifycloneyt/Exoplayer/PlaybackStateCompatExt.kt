@@ -1,7 +1,9 @@
 package com.plcoding.spotifycloneyt.Exoplayer
 
 import android.media.session.PlaybackState
+import android.os.SystemClock
 import android.support.v4.media.session.PlaybackStateCompat
+import android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
 
 // 상태 호환 확장
 // 현재 재생 중인 상태를 전환하기 위해 노래를 재생하는 함수를 만들고
@@ -22,3 +24,9 @@ inline val PlaybackStateCompat.isPlayEnabled
     get() = actions and PlaybackStateCompat.ACTION_PLAY != 0L ||
             (actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L &&
                     state == PlaybackStateCompat.STATE_PAUSED)
+
+inline val PlaybackStateCompat.currentPlaybackPosition: Long
+    get() = if(state == STATE_PLAYING) {
+        val timeDelta = SystemClock.elapsedRealtime() - lastPositionUpdateTime
+        (position + (timeDelta * playbackSpeed).toLong())
+    } else position
